@@ -1,0 +1,15 @@
+owner_name	user_id	roster_id.x	display_name.y	roster_id.y	display_name.x.x	roster_id.x.x	display_name.y.y	roster_id.y.y
+SAM	76447436205604864	12	sgogel1	12	sgogel1	12	sgogel1	7
+JOE	201419410852814848	2	JoeBod	2	JoeBod	2	JoeBod	11
+MAX	201421147118510080	6	Maxmaywin	6	Maxmaywin	6	Maxmaywin	9
+CHARLIE	201421397514256384	4	PottsC	4	CharBod	4	Charo	6
+JON	201422658984747008	1	Best_Bod	1	Best_Bod	1	JonBod	3
+JAMES	201432272212066304	8	jgray2005	8	jgray2005	8	jgray2005	8
+ZACH	201433485691322368	3	zach34	3	zach34	3	zach34	12
+SCOTT	201450514653642752	11	scottyvv	11	scottyvv	11	scottyvv	1
+NICK	201501496271970304	9	ncriswell	9	ncriswell	9	ncriswell	2
+NATE	201507253159723008	5	NorwegianBlues	5	NorwegianBlues	5	NorwegianBlues	4
+DAVE	201902458329370624	10	dlasher	10	dlasher	10	dlasher	10
+JEREMY	201904249083269120	7	jbodlovich	7	jbodlovich	7	jbodlovich	5
+OTTO	332255454342184960	13	Otto9	13	Otto9	13		
+ANTHONY	332607828155969536	14	Riggatony	14	Riggatony	14		

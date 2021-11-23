@@ -8,6 +8,10 @@ library(jsonlite)       # Pulling down JSON data
 library(tidyverse)      # Tools for data analysis
 library(glue)           # Sticking strings together
 
+# config
+options(scipen = 20)
+options(digits = 20)
+
 #### Getting Data ####==========================================================
 
 # User information is required to pull league data and will not change ever
@@ -118,7 +122,7 @@ F_get_weekly_player_stats <- function(season = 2019,
   # Now select those column and melt the data so we can stick our metric values 
   #  onto it. 
   stats_melt0 <- stats_view0 %>% 
-    select(stat_cols) %>% 
+    select(all_of(stat_cols)) %>% 
     gather(stat_code, stat_actual, -player_id, -week) %>% 
     mutate(stat_actual = case_when(is.na(stat_actual) ~ 0, 
                                    TRUE ~ stat_actual))
@@ -135,6 +139,20 @@ F_get_weekly_player_stats <- function(season = 2019,
     group_by(week, player_id) %>% 
     summarise(player_score = sum(stat_extended))
   
+  # The weekly player stats will be combined with matchup, roster, and player info
+  #  in order to get a comprehensive table
+  
+  # pull out player info
+  s2020_ps0 <- s2020_player_stats$stats_melt1
+  
+  # join to other attributes
+  s2020_ps1 <- s2020_ps0 %>% 
+    left_join(s2020_matchups$mu_view0) %>% 
+    left_join(s2020_lg_info$user_vw0) %>% 
+    left_join(select(player_view0, player_id, position, player_name) %>% 
+                distinct()) %>% 
+    mutate(lg_year = 2020)
+  
   list(player_stats_sum0 = player_stats_sum0,
        stats_melt1 = stats_melt1)
   
@@ -148,7 +166,7 @@ F_get_weekly_matchup <- function(season = 2019,
   mu_urls <- paste0("https://api.sleeper.app/v1/league/", .lg_id, "/matchups/", week)
 
   # pull matchup data
-  mu_res <- lapply(mu_urls, function(m) fromJSON(m)) 
+  mu_res <- lapply(mu_urls, function(m) fromJSON(m) %>% select(-players_points)) 
   
   # combine by week
   mu_week <- bind_rows(mu_res, .id = "week")
