@@ -1,4 +1,4 @@
-#### Sleeper Fantasy FOotball Global ####=======================================
+#### Sleeper Fantasy Football Global ####=======================================
 # Code will do things which need to be done every time we use Sleeper data
 
 #### Setting Things Up ####=====================================================
@@ -7,11 +7,6 @@
 library(jsonlite)       # Pulling down JSON data
 library(tidyverse)      # Tools for data analysis
 library(glue)           # Sticking strings together
-library(RColorBrewer)   # Color Pals
-library(plotly)         # Interactive graphics
-library(DT)             # JS datatables package
-library(ggthemes)       # For 538 theme
-library(scales)         # Labels for ggplot scales
 
 #### Getting Data ####==========================================================
 
@@ -101,8 +96,6 @@ F_get_weekly_player_stats <- function(season = 2019,
   # create player stat urls
   ps_urls <- paste0("https://api.sleeper.app/v1/stats/nfl/regular/", season, "/", week)
   
-  
-  # browser()
   # Get the player stats data
   stats_res <- lapply(ps_urls, function(m) fromJSON(m)) 
   
@@ -174,14 +167,3 @@ F_get_weekly_matchup <- function(season = 2019,
        mu_week = mu_week)
   
 }
-
-# Create a theme for ggplots. It will be based on the fivethirtyeight theme
-#  from the ggthemes package but will make a lot of things much smaller. 
-
-theme_nc <- theme_fivethirtyeight() + 
-  theme(axis.title = element_text(),
-        text = element_text(size = 7),
-        plot.title = element_text(size = 10), 
-        plot.subtitle = element_text(size = 8)) 
-        
-  
