@@ -139,20 +139,6 @@ F_get_weekly_player_stats <- function(season = 2019,
     group_by(week, player_id) %>% 
     summarise(player_score = sum(stat_extended))
   
-  # The weekly player stats will be combined with matchup, roster, and player info
-  #  in order to get a comprehensive table
-  
-  # pull out player info
-  s2020_ps0 <- s2020_player_stats$stats_melt1
-  
-  # join to other attributes
-  s2020_ps1 <- s2020_ps0 %>% 
-    left_join(s2020_matchups$mu_view0) %>% 
-    left_join(s2020_lg_info$user_vw0) %>% 
-    left_join(select(player_view0, player_id, position, player_name) %>% 
-                distinct()) %>% 
-    mutate(lg_year = 2020)
-  
   list(player_stats_sum0 = player_stats_sum0,
        stats_melt1 = stats_melt1)
   

@@ -269,7 +269,8 @@ comb_ps1 <- comb_ps0 %>%
   mutate(lg_year = as.factor(lg_year), 
          week = as.factor(week)) %>% 
   left_join(yfg0, by = c("lg_year" = "lg_year")) %>% 
-  left_join(ofg0, by = c("owner_name" = "owner_name"))
+  left_join(ofg0, by = c("owner_name" = "owner_name")) %>% 
+  select(-display_name, -roster_id, -user_id)
 
 #### ~Matchups~ ####============================================================
 
@@ -293,7 +294,8 @@ comb_mu1 <- comb_mu0 %>%
          lg_year = as.factor(lg_year), 
          week = as.factor(week)) %>% 
   left_join(yfg0, by = c("lg_year" = "lg_year")) %>% 
-  left_join(ofg0, by = c("owner_name" = "owner_name"))
+  left_join(ofg0, by = c("owner_name" = "owner_name")) %>% 
+  select(-owner, -opp)
 
 #### ~Write Out~ ####===========================================================
 
@@ -302,14 +304,3 @@ data.table::fwrite(comb_ps1,
 
 data.table::fwrite(comb_mu1, 
                    paste0("data/tableau/matchup.csv"))
-
-# get the user ID information
-all_users <- s2020_lg_info$user_vw0 %>% 
-  bind_rows(s2019_lg_info$user_vw0) %>% 
-  bind_rows(s2018_lg_info$user_vw0) %>% 
-  bind_rows(s2017_lg_info$user_vw0) %>% 
-  select(-roster_id) %>% 
-  distinct() %>% 
-  group_by(user_id) %>% 
-  mutate(numrec = n())
-
