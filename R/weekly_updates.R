@@ -23,7 +23,6 @@ yfg0 <- read_csv("data/reference/year_facet_grid.csv",
                  col_types = cols(lg_year = col_factor()))
 
 #### Weekly Run ####============================================================
-
 cy_lg_info <- F_get_lg_info(season = 2021)
 
 cy_player_stats <- F_get_weekly_player_stats(week = 1:11, season = 2021, 
@@ -32,6 +31,15 @@ cy_player_stats <- F_get_weekly_player_stats(week = 1:11, season = 2021,
 cy_matchups <- F_get_weekly_matchup(season = 2021, 
                                        week = 1:11, 
                                        .lg_id = cy_lg_info$lg_id)
+
+# pull rosters as of now
+rost0 <- fromJSON(paste0("https://api.sleeper.app/v1/league/", cy_lg_info$lg_id, 
+                         "/rosters")) %>% 
+  select(owner_id, players) %>% 
+  unnest(players) %>% 
+  left_join(ouid_ref0, by = c("owner_id" = "user_id")) %>% 
+  select(current_owner = owner_name,
+         players)
 
 # The weekly player stats will be combined with matchup, roster, and player info
 #  in order to get a comprehensive table
@@ -89,7 +97,10 @@ cy_ps2 <- cy_ps1 %>%
   mutate(lg_year = as.factor(lg_year), 
          week = as.factor(week)) %>% 
   left_join(yfg0, by = c("lg_year" = "lg_year")) %>% 
-  left_join(ofg0, by = c("owner_name" = "owner_name"))
+  left_join(ofg0, by = c("owner_name" = "owner_name")) %>% 
+  left_join(rost0, by = c("player_id" = "players")) %>% 
+  mutate(current_owner = case_when(!is.na(current_owner) ~ current_owner, 
+                                   TRUE ~ "FREE AGENT"))
 
 
 cy_weekly_owner_scores3 <- cy_weekly_owner_scores2 %>% 
@@ -101,7 +112,8 @@ cy_weekly_owner_scores3 <- cy_weekly_owner_scores2 %>%
          opp_name = owner_name.y) %>% 
   mutate(margin = points_for - points_against) %>% 
   group_by(week, lg_year) %>% 
-  mutate(beat_mean = as.integer(points_for >= mean(points_for)), 
+  mutate(week_med = median(points_for), 
+         beat_mean = as.integer(points_for >= mean(points_for)), 
          beat_med = as.integer(points_for >= median(points_for)),
          lg_year = as.factor(lg_year), 
          week = as.factor(week)) %>% 
@@ -127,11 +139,25 @@ new_matchups <- cy_weekly_owner_scores3 %>%
 player_stats1 <- player_stats0 %>% 
   bind_rows(new_player_stats)
 
+# Remove positions who are only owned by Free Agent
+fa_pos <- player_stats1 %>% 
+  group_by(position) %>% 
+  summarise(numrec = length(unique(owner_name)),
+            has_fa = "FREE AGENT" %in% owner_name) %>% 
+  ungroup() %>% 
+  filter(numrec == 1, has_fa == TRUE) %>% 
+  select(position) %>% pull()
+
+player_stats2 <- player_stats1 %>% 
+  filter(!(position %in% fa_pos))
+
 matchups1 <- matchups0 %>% 
-  bind_rows(new_matchups)
+  bind_rows(new_matchups) %>% 
+  mutate(outcome = case_when(win == 0 ~ "Loss", 
+                             TRUE ~ "Win"))
 
 
-data.table::fwrite(player_stats1, 
+data.table::fwrite(player_stats2, 
                    paste0("data/tableau/player_stats.csv"))
 
 data.table::fwrite(matchups1, 

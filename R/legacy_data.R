@@ -81,7 +81,6 @@ s2020_weekly_owner_scores2 <- s2020_weekly_owner_scores1 %>%
   left_join(s2020_weekly_opp0) %>% 
   mutate(lg_year = 2020)
 
-
 # 2019 season
 s2019_lg_info <- F_get_lg_info(season = 2019)
 
