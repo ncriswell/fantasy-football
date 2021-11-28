@@ -137,7 +137,10 @@ new_matchups <- cy_weekly_owner_scores3 %>%
   anti_join(matchups0, by = c("week", "lg_year"))
 
 player_stats1 <- player_stats0 %>% 
-  bind_rows(new_player_stats)
+  bind_rows(new_player_stats) %>% 
+  mutate(status = case_when(owner_name == "FREE AGENT" ~ "FREE AGENT", 
+                      starter == TRUE ~ "STARTER", 
+                      starter == FALSE ~ "BENCH"))
 
 # Remove positions who are only owned by Free Agent
 fa_pos <- player_stats1 %>% 
