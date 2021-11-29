@@ -41,7 +41,7 @@ player_view0 <- data.table::rbindlist(player_res_no_lists, fill = TRUE) %>%
   select(player_id, last_name, first_name, team, number, position, years_exp, 
          height, weight, age, status, injury_status, injury_body_part, 
          college, hashtag) %>% 
-  mutate(player_name = paste0(last_name, ", ", str_sub(first_name, 1, 1))) %>% 
+  mutate(player_name = paste0(last_name, ", ", first_name)) %>% 
   distinct() %>% # not sure what happens here, but we get some dupes...
   as_tibble()
 
