@@ -25,11 +25,11 @@ yfg0 <- read_csv("data/reference/year_facet_grid.csv",
 #### Weekly Run ####============================================================
 cy_lg_info <- F_get_lg_info(season = 2021)
 
-cy_player_stats <- F_get_weekly_player_stats(week = 1:11, season = 2021, 
+cy_player_stats <- F_get_weekly_player_stats(week = 1:12, season = 2021, 
                                                 .lg_rules = cy_lg_info$lg_rules)
 
 cy_matchups <- F_get_weekly_matchup(season = 2021, 
-                                       week = 1:11, 
+                                       week = 1:12, 
                                        .lg_id = cy_lg_info$lg_id)
 
 # pull rosters as of now
@@ -124,7 +124,9 @@ cy_weekly_owner_scores3 <- cy_weekly_owner_scores2 %>%
 # Read and replace the existing Tableau data
 player_stats0 <- read_csv("data/tableau/player_stats.csv", 
                           col_types = cols(week = col_factor(), 
-                                           lg_year = col_factor()))
+                                           lg_year = col_factor(),
+                                           player_id = col_character(),
+                                           user_id = col_character()))
          
 matchups0 <- read_csv("data/tableau/matchup.csv",
                       col_types = cols(week = col_factor(), 
