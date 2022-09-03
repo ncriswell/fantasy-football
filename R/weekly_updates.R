@@ -25,11 +25,11 @@ yfg0 <- read_csv("data/reference/year_facet_grid.csv",
 #### Weekly Run ####============================================================
 cy_lg_info <- F_get_lg_info(season = 2021)
 
-cy_player_stats <- F_get_weekly_player_stats(week = 1:16, season = 2021, 
+cy_player_stats <- F_get_weekly_player_stats(week = 1:17, season = 2021, 
                                                 .lg_rules = cy_lg_info$lg_rules)
 
 cy_matchups <- F_get_weekly_matchup(season = 2021, 
-                                       week = 1:16, 
+                                       week = 1:17, 
                                        .lg_id = cy_lg_info$lg_id)
 
 # pull rosters as of now
