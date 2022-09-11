@@ -1,48 +1,67 @@
-#### Draft Gather ####==========================================================
-# Code pull draft results for all years and saves results
+# Pull draft results to obtain auction values for all players. 
 
-#### Setup ####=================================================================
+library(tidyverse)
+library(jsonlite)
+library(glue)
 
-# Source global code that loads packages, pulls standardized reference data, 
-#  and creates some utility functions. 
-source("R/global.R")
+uid0 <- read_csv("data/reference/2022_season_owner_ref.csv",
+                 col_types = cols(.default = col_character()))
 
-#### Utility Functions ####=====================================================
+lgid_preq <- "861706911337267200"
+lgid_seq <- "861712947813130240"
 
-# function to returns picks from a draft when passed a season
-F_get_draft <- function(season = 2021){
+# function pulls draft results into data frame
+Fget_draft <- function(lgid){
+  # construct url to get draft id
+  lg_drf_url <- glue("https://api.sleeper.app/v1/league/{lgid}/drafts")
+  lg_drf <- fromJSON(lg_drf_url)
+  drf_id <- lg_drf$draft_id
   
-  # need to get league info first
-  lg_info <- F_get_lg_info(.user_id = user_id, season = season)
-  
-  # once league ID is known, can get the draft
-  lg_id <- lg_info$lg_id
-  draft_info <- fromJSON(paste0("https://api.sleeper.app/v1/league/", 
-                                lg_id, 
-                                "/drafts")) %>% 
-    filter(status == "complete")
-  draft_id <- draft_info$draft_id
-  
-  # now pull draft picks
-  draft_results <- fromJSON(paste0("https://api.sleeper.app/v1/draft/", 
-                                   draft_id, 
-                                   "/picks"))
-  draft_results
+  # With draft id, now pull draft picks
+  drf_url <- glue("https://api.sleeper.app/v1/draft/{drf_id}/picks")
+  drf <- fromJSON(drf_url)
+  drf_df <- unnest(drf %>% select(-player_id), # player_id also in metadata nest
+                   cols = c(metadata)) %>% 
+    mutate(lg_id = lgid)
+  drf_df
 }
 
+# Pull darft results for both leagues
+drf0 <- bind_rows(lapply(list(lgid_preq, lgid_seq),
+               Fget_draft))
 
-#### Gathering Data ####========================================================
+# Join on the owner reference information, add additional column enhancements
+drf1 <- drf0 %>% 
+  left_join(uid0 %>% select(user_id, owner_name, league_2022) %>% distinct()
+            , by = c("picked_by" = "user_id")) %>% 
+  mutate(player_name = paste0(last_name, ", ", first_name))
 
-# Will just run the function for each year and then write out results
-draft_out0 <- bind_rows(lapply(2017:2021, function(m){
-  df <- F_get_draft(m) %>% 
-    mutate(lg_year = m)
-} ))
+write.csv(drf1, "data/tableau/draft_2022.csv", row.names = FALSE)
 
-# Many of the fields aren't needed
-draft_out1 <- draft_out0 %>% 
-  select(-metadata, -is_keeper)
+#### Scrap Work ####============================================================
+id <- "861706911337267200"
 
-# This is a static file which will not change year to year. Can write out. 
-data.table::fwrite(draft_out1, 
-                   paste0("data/tableau/draft_picks.csv"))
+lgdrf_url <- "https://api.sleeper.app/v1/league/861706911337267200/drafts"
+
+lgdrf <- fromJSON(lgdrf_url)
+did <- lgdrf$draft_id
+
+drf_url <- "https://api.sleeper.app/v1/draft/861706912088039424/picks"
+
+drf <- fromJSON(drf_url)
+
+drf_unnest <- unnest(drf)
+
+
+id2 <- "861712947813130240"
+
+lgdrf_url2 <- "https://api.sleeper.app/v1/league/861712947813130240/drafts"
+
+lgdrf2 <- fromJSON(lgdrf_url2)
+did2 <- lgdrf2$draft_id
+
+drf_url2 <- "https://api.sleeper.app/v1/draft/861712948412948480/picks"
+
+drf2 <- fromJSON(drf_url2)
+
+drf_unnest2 <- unnest(drf2)

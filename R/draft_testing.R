@@ -2,7 +2,12 @@ library(httr)
 library(tidyverse)
 library(jsonlite)
 
+lgid_preq <- "861706911337267200"
+lgid_seq <- "861712947813130240"
 
+Fget_draft <- function(lgid){
+  # 
+}
 
 id <- "861706911337267200"
 

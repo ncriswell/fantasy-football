@@ -7,6 +7,7 @@ library(jsonlite)
 lgid_preq <- "861706911337267200"
 lgid_seq <- "861712947813130240"
 
+# function pulls users for league given league id
 Fget_users <- function(lgid){
   lg_url <- glue("https://api.sleeper.app/v1/league/{lgid}/users")
   user_json0 <- fromJSON(lg_url)
@@ -28,6 +29,7 @@ write.csv(tlst_owners0 %>%  select(display_name) %>% distinct(),
           "data/reference/2022_owner_names.csv",
           row.names = FALSE)
 
+# Read manually mapped results back in
 owner_names0 <- read_csv("data/reference/2022_owner_names.csv")
 
 # Now join this back onto the original table with the UIDs in it. 
