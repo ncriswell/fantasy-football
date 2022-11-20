@@ -51,21 +51,35 @@ player_view0 <- data.table::rbindlist(player_res_no_lists, fill = TRUE) %>%
 #   league id
 #   league rules
 #   league owners
-F_get_lg_info <- function(.user_id = user_id, 
-                        season = 2019){
-  
-  # get league information
+F_get_lg_info <- function(.user_id = user_id,
+                          .lg_id = NULL, 
+                        season = 2019, 
+                        .method = c("user_id", "lg_id")){
+  method <- match.arg(.method)
+  # browser()
+  # get league information - can be pulled by UID or league ID
+  # there are some differences in the grain of the data returned here
+  #  so the processing steps are also a little different. 
+  if (method == "user_id"){
   lg_res <- fromJSON(glue("https://api.sleeper.app/v1/user/", 
                           .user_id, 
                               "/leagues/nfl/", season))
   lg_id <- lg_res$league_id
-  
   # get the scoring rules for this season
   lg_rules <- data.frame(t(lg_res$scoring_settings), 
-                             stringsAsFactors = FALSE) %>% 
+                         stringsAsFactors = FALSE) %>% 
     rownames_to_column(var = "stat_code") %>% 
     rename(stat_value = X1) %>% 
     as_tibble()
+  } else if(method == "lg_id") { 
+    lg_id <- .lg_id
+    lg_res <- fromJSON(glue("https://api.sleeper.app/v1/league/", lg_id))
+    # get the scoring rules for this season
+    lg_rules <- data.frame(stat_value = unlist(lg_res[["scoring_settings"]])) %>% 
+      rownames_to_column(var  = "stat_code") %>% 
+      as_tibble()
+  }
+  
   
   # get the users
   users_res <- fromJSON(glue("https://api.sleeper.app/v1/league/", 
@@ -81,7 +95,9 @@ F_get_lg_info <- function(.user_id = user_id,
   user_vw0 <- users_res %>% 
     select(display_name, user_id) %>% 
     left_join(select(rosters_res, owner_id, roster_id), 
-              by = c("user_id" = "owner_id"))
+              by = c("user_id" = "owner_id")) %>% 
+    filter(!is.na(roster_id)) %>%  # pulling super league info
+    mutate(lg_id = lg_id)
   
   # things to return
   list(lg_res = lg_res, 
@@ -156,8 +172,8 @@ F_get_weekly_matchup <- function(season = 2019,
   
   # combine by week
   mu_week <- bind_rows(mu_res, .id = "week")
-  
-  # This is nested DF where starters and players are both nested. Unnest this
+
+    # This is nested DF where starters and players are both nested. Unnest this
   # and identify the starters
   mu_view0 <- mu_week %>% 
     select(-custom_points) %>% 
@@ -166,7 +182,9 @@ F_get_weekly_matchup <- function(season = 2019,
     rowwise() %>% 
     mutate(starter = player_id %in% unlist(starters)) %>% 
     select(-starters, -starters_points, -points) %>% 
-    as_tibble()
+    as_tibble() %>% 
+    mutate(lg_id = .lg_id) # two league thing
+  
   list(mu_view0 = mu_view0,
        mu_week = mu_week)
   
