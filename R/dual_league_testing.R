@@ -28,8 +28,8 @@ ofg0 <- read_csv("data/reference/owner_facet_grid.csv",
 yfg0 <- read_csv("data/reference/year_facet_grid.csv", 
                  col_types = cols(lg_year = col_factor()))
 
-cy_player_stats <- F_get_weekly_player_stats(week = 1:10, season = 2022, 
-                                             .lg_rules = pql_lg_info$lg_rules)
+# cy_player_stats <- F_get_weekly_player_stats(week = 1:11, season = 2022, 
+#                                              .lg_rules = pql_lg_info$lg_rules)
 
 
 # Pull information for each league. Will be running all the utility twice - 
@@ -52,11 +52,11 @@ lg_usr_view <- bind_rows(sql_lg_info$user_vw0,
 
 # matchup - lets us know who played who each week
 pql_matchups <- F_get_weekly_matchup(season = 2022, 
-                                     week = 1:10, 
+                                     week = 1:15, 
                                      .lg_id = pql_id)
 
 sql_matchups <- F_get_weekly_matchup(season = 2022, 
-                                     week = 1:10, 
+                                     week = 1:15, 
                                      .lg_id = sql_id)
 
 mu_view <- bind_rows(pql_matchups$mu_view0,
@@ -67,7 +67,7 @@ mu_view <- bind_rows(pql_matchups$mu_view0,
 #                                     .lg_id = cy_lg_info$lg_id)
 
 # pull player stats
-cy_player_stats <- F_get_weekly_player_stats(week = 1:10, season = 2022, 
+cy_player_stats <- F_get_weekly_player_stats(week = 1:15, season = 2022, 
                                              .lg_rules = pql_lg_info$lg_rules)
 
 
